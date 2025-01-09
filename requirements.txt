@@ -1,6 +1,4 @@
-Flask
-python-telegram-bot
-gspread
-oauth2client
-requests
-
+Flask==2.2.2                  # Web framework for handling webhooks
+python-telegram-bot==20.3     # Telegram Bot API for bot interactions
+requests==2.31.0              # For making HTTP requests (to Make webhooks)
+gunicorn==20.1.0              # Production WSGI server for deployment (Render/Heroku)

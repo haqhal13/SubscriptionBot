@@ -1,3 +1,8 @@
-from urllib.parse import quote
+from config import ADMIN_ID
 
-quoted_url = quote("your_url_here")
+def notify_admin(bot, message):
+    """Sends a notification to the admin."""
+    try:
+        bot.send_message(chat_id=ADMIN_ID, text=message)
+    except Exception as e:
+        print(f"Error notifying admin: {e}")

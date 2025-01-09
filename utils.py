@@ -1,3 +1,3 @@
-def notify_admin(bot, message):
-    """Sends a notification to the admin."""
-    bot.send_message(chat_id=ADMIN_ID, text=message)
+from urllib.parse import quote
+
+quoted_url = quote("your_url_here")

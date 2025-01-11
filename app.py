@@ -4,10 +4,10 @@ import os
 
 app = Flask(__name__)
 
-# Fetch the bot token from environment variables
+# Fetch environment variables
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
-    raise ValueError("BOT_TOKEN environment variable not set")
+    raise ValueError("BOT_TOKEN environment variable is not set. Check your deployment configuration.")
 
 def send_message(chat_id, text):
     """Send a message to a Telegram user."""
@@ -37,6 +37,6 @@ def webhook():
     return "OK"
 
 if __name__ == '__main__':
-    # Run the app on the specified port (default: 5000)
-    port = int(os.environ.get("PORT", 5000))
+    # Run the app on the specified port
+    port = int(os.environ.get("PORT", 5000))  # Default to port 5000 if not specified
     app.run(host='0.0.0.0', port=port)

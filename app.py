@@ -16,6 +16,7 @@ db_path = os.path.join(os.getcwd(), "bot_data.db")
 
 def initialize_database():
     """Create database tables if they don't exist."""
+    print(f"Database path: {db_path}")  # Debugging statement
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 

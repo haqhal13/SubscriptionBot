@@ -1,22 +1,25 @@
 from flask import Flask, request
 import requests
-import os
 import sqlite3
+import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-# Bot Token
+# Bot Token and Group ID
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+GROUP_ID = os.getenv("GROUP_ID")  # Replace with your group ID if not using env vars
 
-# Group ID (VIP Group)
-GROUP_ID = os.getenv("GROUP_ID")
+# Absolute path for the database file
+db_path = os.path.join(os.getcwd(), "bot_data.db")
 
 
 def initialize_database():
     """Create database tables if they don't exist."""
-    conn = sqlite3.connect("bot_data.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
+
+    # Create the `invites` table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS invites (
         invite_link TEXT PRIMARY KEY,
@@ -26,6 +29,8 @@ def initialize_database():
         join_date TIMESTAMP
     )
     """)
+
+    # Create the `reminders` table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reminders (
         user_id INTEGER,
@@ -36,6 +41,7 @@ def initialize_database():
         PRIMARY KEY (user_id, link_used)
     )
     """)
+
     conn.commit()
     conn.close()
 
@@ -58,7 +64,7 @@ def create_invite_link():
 
 def store_invite_link(invite_link):
     """Store the generated invite link in the database."""
-    conn = sqlite3.connect("bot_data.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO invites (invite_link) VALUES (?)", (invite_link,))
     conn.commit()
@@ -67,7 +73,7 @@ def store_invite_link(invite_link):
 
 def track_user(user_id, username, invite_link):
     """Track the user who joined through the invite link."""
-    conn = sqlite3.connect("bot_data.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     join_date = datetime.now()
     kick_date = join_date + timedelta(days=29)
@@ -92,7 +98,7 @@ def track_user(user_id, username, invite_link):
 
 def send_reminder():
     """Send reminders to users whose subscription is about to expire."""
-    conn = sqlite3.connect("bot_data.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     today = datetime.now()
@@ -112,7 +118,7 @@ def send_reminder():
 
 def kick_expired_users():
     """Kick users whose subscription has expired."""
-    conn = sqlite3.connect("bot_data.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     today = datetime.now()
@@ -152,7 +158,7 @@ def webhook():
             send_message(chat_id, f"Here is your one-time use invite link: {invite_link}")
 
         elif text == "/list":
-            conn = sqlite3.connect("bot_data.db")
+            conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM invites")
             rows = cursor.fetchall()
@@ -160,7 +166,7 @@ def webhook():
             message = "Invite List:\n"
             for row in rows:
                 invite_link, created_at, user_id, username, join_date = row
-                message += f"Link: {invite_link}, User: {username}, Join Date: {join_date}\n"
+                message += f"Link: {invite_link}, User: {username or 'N/A'}, Join Date: {join_date or 'N/A'}\n"
 
             send_message(chat_id, message)
 

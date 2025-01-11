@@ -13,6 +13,33 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 GROUP_ID = os.getenv("GROUP_ID")
 
 
+def initialize_database():
+    """Create database tables if they don't exist."""
+    conn = sqlite3.connect("bot_data.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS invites (
+        invite_link TEXT PRIMARY KEY,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        user_id INTEGER,
+        username TEXT,
+        join_date TIMESTAMP
+    )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS reminders (
+        user_id INTEGER,
+        chat_id INTEGER,
+        reminder_date TIMESTAMP,
+        kick_date TIMESTAMP,
+        link_used TEXT,
+        PRIMARY KEY (user_id, link_used)
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+
 def send_message(chat_id, text):
     """Send a message to a Telegram user."""
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -147,4 +174,5 @@ def webhook():
 
 
 if __name__ == "__main__":
+    initialize_database()
     app.run(port=5000)
